@@ -1,0 +1,152 @@
+import fs from 'fs';
+import { nanoid } from 'nanoid';
+import path from 'path';
+import DateHelper from './date-helper.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import pg from 'pg'
+const { Pool } = pg;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+import { config } from 'dotenv';
+config();
+
+const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
+const URL = `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?options=project%3D${ENDPOINT_ID}`;
+const pool = new Pool({
+    connectionString: URL,
+    ssl: {
+        rejectUnauthorized: false,
+        sslmode: 'require',
+    },
+});
+
+const getImgByIdHandler = (req, res) => {
+    const { idS, id } = req.params;
+    const idStory = parseInt(idS);
+    const data = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA-IMG.json'));
+    const jsonData = JSON.parse(data);
+    const imageData = jsonData.picture.find((story) => story.idStory === idStory);
+    const image = imageData.fileImg.find((img) => img.id === id);
+
+    if (!image) {
+        return res.send('Gambar tidak ditemukan');
+    }
+    const { fileName } = image;
+
+    const imagePath = path.join(__dirname, 'assets', fileName);
+
+    return res.sendFile(imagePath);
+};
+
+const getThumbByIdHandler = (request, res) => {
+    try {
+        const imageId = parseInt(request.params.id);
+        const data = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA-IMG.json'));
+        const jsonData = JSON.parse(data);
+        const thumbnailImg = jsonData.thumbnail.find((thumb) => thumb.id === imageId);
+
+        if (thumbnailImg) {
+            const { fileName } = thumbnailImg;
+            const imagePath = path.join(__dirname, 'assets', fileName);
+
+            return res.sendFile(imagePath);
+        }
+        return res.send('Data not found');
+    } catch (error) {
+        console.error('Error reading JSON file:', error);
+        return res.send('Error');
+    }
+};
+
+const getAllBooks = () => {
+    try {
+        console.log(PGDATABASE);
+        const jsonData = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA.json'));
+        const data = JSON.parse(jsonData);
+        return data;
+    } catch (error) {
+        console.error('Error reading JSON file:', error);
+        return res.send('Error');
+    }
+};
+
+const getBookByIdHandler = (req, res) => {
+    try {
+        const { id } = req.params;
+        const data = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA.json'));
+        const jsonData = JSON.parse(data);
+        const story = jsonData.stories.find((story) => story.id === id);
+
+        if (story) {
+            return res.send(story);
+        }
+        return res.send('Data not found');
+    } catch (error) {
+        console.error('Error reading JSON file:', error);
+        return res.send('Error');
+    }
+};
+
+const searchStoryHandler = async (req, res) => {
+    const { title } = req.query;
+    const data = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA.json'));
+    const jsonData = JSON.parse(data);
+    const result = jsonData.stories.filter((story) => story.title.toLowerCase().replace(/\s/g, '').includes(title.toLowerCase().replace(/\s/g, '')));
+
+    return res.send(result);
+};
+
+const addingRev = async (req, res) => {
+    const { id, name, review } = req.body || {};
+    if (!id || !name || !review) {
+        return res.status(400).send('Payload tidak valid');
+    }
+
+    const id_review = nanoid(8);
+    const DATE = new Date().toLocaleString('en-US', { timeZone: 'Asia/Singapore' });
+    const inDate = new Date(DATE);
+    const year = inDate.getFullYear();
+    const month = String(DateHelper.monthNameChecker(inDate.getMonth() + 1));
+    const day = String(inDate.getDate());
+    const date = `${day} ${month} ${year}`;
+    const query = `
+        INSERT INTO review (id_review, id_story, nama, tanggal, isi_review)
+        VALUES ($1, $2, $3, $4, $5) RETURNING id_review, id_story, nama, tanggal, isi_review
+    `;
+    const values = [id_review, id, name, date, review];
+    const { rows } = await pool.query(query, values);
+    res.send(rows);
+}
+
+const getReviewById = async (req, res) => {
+    const { id } = req.params;
+    const query = `
+        SELECT * FROM review WHERE id_story = $1
+    `;
+    const values = [id];
+    const { rows } = await pool.query(query, values);
+    res.send(rows);
+}
+
+const deleteReviewByRevId = async (req, res) => {
+    const { id } = req.params;
+    const query = `
+            DELETE FROM review WHERE id_review = $1 RETURNING id_review, id_story, nama, tanggal, isi_review
+    `;
+    const values = [id];
+    const { rows } = await pool.query(query, values);
+    res.send(rows);
+}
+
+const getAllReviewOrderByDate = async (req, res) => {
+    const query = `
+            SELECT * FROM review ORDER BY tanggal ASC
+    `;
+    const { rows } = await pool.query(query);
+    res.send(rows);
+}
+
+
+export { getAllBooks, getBookByIdHandler, getImgByIdHandler, getThumbByIdHandler, searchStoryHandler, addingRev,
+        getReviewById, deleteReviewByRevId, getAllReviewOrderByDate };
