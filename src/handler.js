@@ -8,11 +8,8 @@ import pg from 'pg'
 const { Pool } = pg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-import { config } from 'dotenv';
-config();
 
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
-const URL = `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?options=project%3D${ENDPOINT_ID}`;
+const URL = `postgres://ananda.diaz1202:tu0sdbr7mjxh@ep-rapid-rice-384125-pooler.ap-southeast-1.aws.neon.tech/neondb`;
 const pool = new Pool({
     connectionString: URL,
     ssl: {
@@ -61,7 +58,6 @@ const getThumbByIdHandler = (request, res) => {
 
 const getAllBooks = () => {
     try {
-        console.log(PGDATABASE);
         const jsonData = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA.json'));
         const data = JSON.parse(jsonData);
         return data;
