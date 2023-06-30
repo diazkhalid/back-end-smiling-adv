@@ -164,7 +164,11 @@ const getCount = async (req, res) => {
     const query = 'SELECT COUNT(*) AS total FROM review';
     const { rows } = await pool.query(query);
     const totalReview = rows[0].total;
-    res.send({Cerita:{title: "Cerita", idDashImg: "1", totalCerita}, Review:{title: "Review", idDashImg: "2", totalReview}});
+    const datas = [
+        { title: 'Cerita', idDashImg: '1', total: totalCerita },
+        { title: 'Review', idDashImg: '2', total: totalReview }
+    ];
+    res.send(datas);
 }
 
 const getDashboardImg = async (req, res) => {
