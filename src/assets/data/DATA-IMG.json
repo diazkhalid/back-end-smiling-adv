@@ -382,5 +382,15 @@
                 }
             ]   
         }
+    ],
+    "dashboard":[
+        {
+            "id": "1",
+            "fileName": "Dashboard/favbooks.png" 
+        },
+        {
+            "id": "2",
+            "fileName": "Dashboard/review.png" 
+        }
     ]
 }

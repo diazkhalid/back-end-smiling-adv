@@ -143,6 +143,46 @@ const getAllReviewOrderByDate = async (req, res) => {
     res.send(rows);
 }
 
+const getStoryCount = async (req, res) => {
+    const data = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA.json'));
+    const jsonData = JSON.parse(data);
+
+    const storyCount = jsonData.stories.length.toString();
+    res.send(storyCount);
+}
+
+const getReviewCount = async (req, res) => {
+    const query = 'SELECT COUNT(*) AS total FROM review';
+    const { rows } = await pool.query(query);
+    const total = rows[0].total;
+    res.send(total.toString());
+}
+const getCount = async (req, res) => {
+    const data = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA.json'));
+    const jsonData = JSON.parse(data);
+    const totalCerita = jsonData.stories.length;
+    const query = 'SELECT COUNT(*) AS total FROM review';
+    const { rows } = await pool.query(query);
+    const totalReview = rows[0].total;
+    res.send({Cerita:{title: "Cerita", idDashImg: "1", totalCerita}, Review:{title: "Review", idDashImg: "2", totalReview}});
+}
+
+const getDashboardImg = async (req, res) => {
+    const imageId = req.params.id;
+    const data = fs.readFileSync(path.join(__dirname, 'assets/data', 'DATA-IMG.json'));
+    const jsonData = JSON.parse(data);
+    const dashboardImg = jsonData.dashboard.find((dash) => dash.id === imageId);
+
+    if (dashboardImg) {
+        const { fileName } = dashboardImg;
+        const imagePath = path.join(__dirname, 'assets', fileName);
+
+        return res.sendFile(imagePath);
+    }
+    return res.send('Data not found');
+}
+
 
 export { getAllBooks, getBookByIdHandler, getImgByIdHandler, getThumbByIdHandler, searchStoryHandler, addingRev,
-        getReviewById, deleteReviewByRevId, getAllReviewOrderByDate };
+        getReviewById, deleteReviewByRevId, getAllReviewOrderByDate, getStoryCount, getReviewCount, getCount,
+        getDashboardImg, };
