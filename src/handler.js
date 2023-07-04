@@ -210,7 +210,17 @@ const getAllMsg = async (req, res) => {
     res.send(rows);
 }
 
+const deleteMsgByMsgId = async (req, res) => {
+    const { id } = req.params;
+    const query = `
+            DELETE FROM pesan WHERE id_pesan= $1 RETURNING id_pesan, nama, email, isi_pesan
+    `;
+    const values = [id];
+    const { rows } = await pool.query(query, values);
+    res.send(rows);
+}
+
 
 export { getAllBooks, getBookByIdHandler, getImgByIdHandler, getThumbByIdHandler, searchStoryHandler, addingRev,
         getReviewById, deleteReviewByRevId, getAllReviewOrderByDate, getStoryCount, getReviewCount, getCount,
-        getDashboardImg, sendMsg, getAllMsg};
+        getDashboardImg, sendMsg, getAllMsg, deleteMsgByMsgId};
