@@ -162,11 +162,15 @@ const getCount = async (req, res) => {
     const jsonData = JSON.parse(data);
     const totalCerita = jsonData.stories.length;
     const query = 'SELECT COUNT(*) AS total FROM review';
-    const { rows } = await pool.query(query);
-    const totalReview = rows[0].total;
+    const queryMsg = 'SELECT COUNT(*) AS total FROM pesan';
+    const { rows: reviewsRows } = await pool.query(query);
+    const { rows: messageRows } = await pool.query(queryMsg);
+    const totalReview = reviewsRows[0].total;
+    const totalPesan = messageRows[0].total;
     const datas = [
         { title: 'Cerita', idDashImg: '1', total: totalCerita },
-        { title: 'Review', idDashImg: '2', total: totalReview }
+        { title: 'Review', idDashImg: '2', total: totalReview },
+        { title: 'Pesan', idDashImg: '3', total: totalPesan },
     ];
     res.send(datas);
 }
