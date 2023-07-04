@@ -186,7 +186,31 @@ const getDashboardImg = async (req, res) => {
     return res.send('Data not found');
 }
 
+const sendMsg = async (req, res) => {
+    const { name, email, message } = req.body || {};
+    if (!name || !email || !message) {
+        return res.status(400).send('Payload tidak valid');
+    }
+
+    const id_pesan = nanoid(8);
+    const query = `
+        INSERT INTO pesan (id_pesan, nama, email, isi_pesan)
+        VALUES ($1, $2, $3, $4) RETURNING id_pesan, nama, email, isi_pesan
+    `;
+    const values = [id_pesan, name, email, message];
+    const { rows } = await pool.query(query, values);
+    res.send(rows);
+}
+
+const getAllMsg = async (req, res) => {
+    const query = `
+            SELECT * FROM pesan ORDER BY nama ASC
+    `;
+    const { rows } = await pool.query(query);
+    res.send(rows);
+}
+
 
 export { getAllBooks, getBookByIdHandler, getImgByIdHandler, getThumbByIdHandler, searchStoryHandler, addingRev,
         getReviewById, deleteReviewByRevId, getAllReviewOrderByDate, getStoryCount, getReviewCount, getCount,
-        getDashboardImg, };
+        getDashboardImg, sendMsg, getAllMsg};

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { getAllBooks, getBookByIdHandler, getImgByIdHandler, getThumbByIdHandler, 
         searchStoryHandler, addingRev, getReviewById, deleteReviewByRevId, getAllReviewOrderByDate, 
-        getStoryCount, getReviewCount, getCount, getDashboardImg } from "./handler.js";
+        getStoryCount, getReviewCount, getCount, getDashboardImg, sendMsg, getAllMsg } from "./handler.js";
 const app = Express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,4 +30,6 @@ app.get("/getStoryCount", getStoryCount);
 app.get("/getReviewCount", getReviewCount);
 app.get("/getCount", getCount);
 app.get("/getDashImg/:id", getDashboardImg);
+app.post("/sendMsg", sendMsg);
+app.get("/getAllMsg", getAllMsg);
 export default app;
