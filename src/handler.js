@@ -224,7 +224,17 @@ const deleteMsgByMsgId = async (req, res) => {
     res.send(rows);
 }
 
+const getAdminByUsername = async (req, res) => {
+    const { username } = req.params;
+    const query = `
+            SELECT * FROM admin WHERE username = $1
+    `;
+    const values = [username];
+    const { rows } = await pool.query(query, values);
+    res.send(rows);
+}
+
 
 export { getAllBooks, getBookByIdHandler, getImgByIdHandler, getThumbByIdHandler, searchStoryHandler, addingRev,
         getReviewById, deleteReviewByRevId, getAllReviewOrderByDate, getStoryCount, getReviewCount, getCount,
-        getDashboardImg, sendMsg, getAllMsg, deleteMsgByMsgId};
+        getDashboardImg, sendMsg, getAllMsg, deleteMsgByMsgId, getAdminByUsername};
