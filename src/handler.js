@@ -137,7 +137,7 @@ const deleteReviewByRevId = async (req, res) => {
 
 const getAllReviewOrderByDate = async (req, res) => {
     const query = `
-            SELECT * FROM review ORDER BY tanggal ASC
+            SELECT * FROM review
     `;
     const { rows } = await pool.query(query);
     res.send(rows);
